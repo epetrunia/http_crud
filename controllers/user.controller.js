@@ -1,5 +1,6 @@
 const { User } = require('./../models');
 const _ = require('lodash');
+const e = require('express');
 
 exports.createUser = async (req, res, next) => {
   const { body } = req;
@@ -21,10 +22,78 @@ exports.createUser = async (req, res, next) => {
   }
 };
 
-exports.getUserById = async (req, res, next) => {};
+exports.getUserById = async (req, res, next) => {
+  const {
+    params: { userId },
+  } = req;
+  try {
+    const requestedUser = await User.findOne({
+      where: { id: userId },
+    });
+    if (requestedUser) {
+      const userData = requestedUser.get();
+      const preparedUser = _.omit(userData, [
+        'passwordHash',
+        'updatedAt',
+        'createdAt',
+      ]);
+      res.status(200).send({ data: preparedUser });
+    }
+    res.status(404).send({ message: `User with id ${userId} not found` });
+  } catch (e) {
+    next(e);
+  }
+};
 
-exports.getAllUsers = async (req, res, next) => {};
+exports.getAllUsers = async (req, res, next) => {
+  try {
+    const allUsers = await User.findAll({
+      attributes: { exclude: ['passwordHash', 'updatedAt', 'createdAt'] },
+    });
+    res.status(200).send({ data: allUsers });
+  } catch {
+    return next(e);
+  }
+};
 
-exports.updateUserById = async (req, res, next) => {};
+exports.updateUserById = async (req, res, next) => {
+  const {
+    body,
+    params: { userId },
+  } = req;
+  try {
+    const requestedUser = await User.findOne({
+      where: { id: userId },
+    });
+    if (requestedUser) {
+      const updatedUser = await requestedUser.update(body);
+      const userData = updatedUser.get();
+      const preparedUser = _.omit(userData, [
+        'passwordHash',
+        'updatedAt',
+        'createdAt',
+      ]);
+      res.status(200).send({ data: preparedUser });
+    }
+    res.status(404).send({ message: `User with id ${userId} not found` });
+  } catch (e) {
+    return next(e);
+  }
+};
 
-exports.deleteUserById = async (req, res, next) => {};
+exports.deleteUserById = async (req, res, next) => {
+  const {
+    params: { userId },
+  } = req;
+  try {
+    const result = await User.destroy({
+      where: { id: userId },
+    });
+    if (result) {
+      res.status(204).send({ message: `User with id ${userId} was deleted` });
+    }
+    res.status(404).send({ message: `User with id ${userId} not found` });
+  } catch (e) {
+    return next(e);
+  }
+};
