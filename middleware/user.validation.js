@@ -2,7 +2,7 @@ const yup = require('yup');
 const {
   CREATE_USER_SCHEMA,
   UPDATE_USER_SCHEMA,
-} = require('../utils/validation');
+} = require('./../utils/validation');
 
 module.exports.validateCreatedUser = async (req, res, next) => {
   const { body } = req;

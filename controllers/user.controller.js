@@ -29,15 +29,10 @@ exports.getUserById = async (req, res, next) => {
   try {
     const requestedUser = await User.findOne({
       where: { id: userId },
+      attributes: { exclude: ['passwordHash', 'updatedAt', 'createdAt'] },
     });
     if (requestedUser) {
-      const userData = requestedUser.get();
-      const preparedUser = _.omit(userData, [
-        'passwordHash',
-        'updatedAt',
-        'createdAt',
-      ]);
-      res.status(200).send({ data: preparedUser });
+      res.status(200).send({ data: requestedUser });
     }
     res.status(404).send({ message: `User with id ${userId} not found` });
   } catch (e) {
@@ -64,16 +59,11 @@ exports.updateUserById = async (req, res, next) => {
   try {
     const requestedUser = await User.findOne({
       where: { id: userId },
+      attributes: { exclude: ['passwordHash', 'updatedAt', 'createdAt'] },
     });
     if (requestedUser) {
       const updatedUser = await requestedUser.update(body);
-      const userData = updatedUser.get();
-      const preparedUser = _.omit(userData, [
-        'passwordHash',
-        'updatedAt',
-        'createdAt',
-      ]);
-      res.status(200).send({ data: preparedUser });
+      res.status(200).send({ data: updatedUser });
     }
     res.status(404).send({ message: `User with id ${userId} not found` });
   } catch (e) {
